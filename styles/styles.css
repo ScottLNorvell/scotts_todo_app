@@ -1,0 +1,99 @@
+body {
+  font-family: Helvetica, Arial, Sans-Serif;
+  background: #fafafa;
+  color: #808080;
+}
+
+button, input[type=text] {
+  outline: none;
+}
+
+h1 {
+  color: #404040;
+  font-family: Georgia;
+}
+p {
+  margin: 0px;
+}
+li {
+  margin: 5px;
+}
+
+#container {
+  width: 1000px;
+  margin: auto;
+}
+
+#new-task-field {
+  padding: 10px;
+  border: none;
+  width: 789px;
+  margin: 0 0 0 45px;
+}
+
+.items {
+  padding: 10px;
+  background: white;
+  color: #808080;
+}
+.meta-data {
+  color: #aaaaaa;
+  font-size: small;
+  font-style: italic;
+}
+
+#unfinished,
+#finished {
+  margin: 10px 0 10px 0;
+  padding: 10px 40px 10px 10px;
+  background: #404040;
+  color: #eeeeee;
+}
+#finished li {
+  list-style-type: none;
+}
+#finished li .items {
+  color: #aaaaaa;
+}
+
+li {
+  height: 40px;
+}
+
+.actions {
+  float: right;
+}
+
+button {
+  margin: 0px;
+  border: none;
+  cursor: pointer;
+  height: 85%;
+  -webkit-transition: all .5s;
+  -moz-transition: all .5s;
+  -ms-transition: all .5s;
+  -o-transition: all .5s;
+  transition: all .5s;
+}
+
+button:hover {
+  padding: 5px;
+  color: #6060ff;
+}
+
+.delete {
+  background: #eecccc;
+}
+.complete {
+  background: #eeeeee;
+}
+#add-item {
+  background: #6060ff;
+  color: black;
+  padding: 10px 20px 10px 20px;
+  opacity: .8;
+}
+
+#add-item:hover {
+  opacity: 1;
+}
