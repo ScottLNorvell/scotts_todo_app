@@ -20,58 +20,124 @@ var TodoApp = function() {
 
 	this.createTask = function(text) {
 		text = sanitize(text);
+		var el;
 		var task = new TodoItem(text);
 		if (_.findWhere(this.unfinished_tasks, {text: text})) {
 			// do nothing!
 		} else {
 			this.unfinished_tasks.push(task);
-			localStorage.setItem('unfinished_tasks', JSON.stringify(this.unfinished_tasks));	
-			this.appendTask(task);
+			localStorage.setItem('unfinished_tasks', JSON.stringify(this.unfinished_tasks));
+			el = this.makeTaskElement(task, false);
+			this.appendTask(el, false);
 		}
 
 		
 	};
 
-	this.completeTask = function(el, text) {
+	this.makeTaskElement = function(task, complete) {
+		var el = document.createElement('li');
+		var text_span = this.makeTextSpan(task);
+		var meta_data = this.makeMetaData(task, complete);
+		var delete_btn = this.makeButton('delete');
+		var complete_btn = this.makeButton('complete');
+		el.className = "items";
+		el.dataset.tasktext = task.text;
+
+		el.appendChild(text_span);
+		el.appendChild(meta_data);
+		
+		
+		if (!complete) {
+			el.appendChild(complete_btn)
+		} else {
+			el.dataset.completed = 'true';
+		}
+
+		el.appendChild(delete_btn);
+		return el 
+	};
+
+	this.makeButton = function(class_name) {
+		var button = document.createElement('button');
+		button.className = class_name;
+		if (class_name == 'delete') {
+			button.innerText = 'Delete';
+			button.onclick = function() { todo_app.deleteTask(this.parentElement); }
+		} else {
+			button.innerText = 'Complete';
+			button.onclick = function() { todo_app.completeTask(this.parentElement); }	
+		}
+
+		return button
+	};
+
+	this.makeTextSpan = function(task) {
+		var text_span = document.createElement('span');
+		text_span.className = "task-text";
+		text_span.innerText = task.text;
+		return text_span;
+	};
+
+	this.makeMetaData = function(task, complete) {
+		var meta_data = document.createElement('span');
+		meta_data.className = "meta-data";
+		if (complete) {
+			meta_data.innerText = " completed at " + task.completed + " ";
+		} else {
+			meta_data.innerText = " created at " + task.created + " ";
+		}
+		return meta_data;
+	};
+
+
+
+	this.appendTask = function(el, complete) {
+		if (complete) {
+			completed_items.appendChild(el);
+		} else {
+			todo_items.appendChild(el);
+		}
+	};
+
+	this.completeTask = function(el) {
 		var completed = new Date();
-		// var text = el.dataset.tasktext;
+		var text = el.dataset.tasktext;
+		var task, completed_el;
+
 		el.remove();
 
-		var task = _.findWhere(this.unfinished_tasks, {text: text});
-
+		task = _.findWhere(this.unfinished_tasks, {text: text});
+		
 		if (task) {
 			task.completed = completed.toLocaleTimeString();
 		}
 
-		var updated_unfinished_task_array = _.reject(this.unfinished_tasks, function(task) { return task.text == text } );
+		completed_el = this.makeTaskElement(task, true);
 
-		this.unfinished_tasks = updated_unfinished_task_array;
-		
+		this.unfinished_tasks = _.reject(this.unfinished_tasks, function(task) { return task.text == text } );		
 		this.finished_tasks.push(task);
 		
-		localStorage.setItem('finished_tasks', JSON.stringify(this.finished_tasks));
-		localStorage.setItem('unfinished_tasks', JSON.stringify(this.unfinished_tasks));
+		this.storeTasks();
 
-		var completed_button = el.getElementsByClassName('complete')[0];
-		completed_button.remove();
-		el.getElementsByClassName('meta-data')[0].innerHTML = " completed at " + completed.toLocaleTimeString();
-		el.dataset.completed = 'true';
-		completed_items.appendChild(el);
-		console.log(el);
+		this.appendTask(completed_el, true);
 
 	};
 
-	this.deleteTask = function(el, text) {
-		var updated_array;
+	this.deleteTask = function(el) {
+		var updated_array, task;
 		var completed = el.dataset.completed;
+		var text = el.dataset.tasktext;
+		var task;
 		if (completed) {
 			//take out of finished
+			task = _.findWhere(this.finished_tasks, {text: text});
 			updated_array = _.reject(this.finished_tasks, function(task) { return task.text == text; } );
 			this.finished_tasks = updated_array;
 			localStorage.setItem('finished_tasks', JSON.stringify(this.finished_tasks));
 
 		} else {
 			// take out of unfinished
+			task = _.findWhere(this.unfinished_tasks, {text: text});
 			updated_array =  _.reject(this.unfinished_tasks, function(task) { return task.text == text; } );
 			this.unfinished_tasks = updated_array;
 			localStorage.setItem('unfinished_tasks', JSON.stringify(this.unfinished_tasks));
@@ -80,34 +146,17 @@ var TodoApp = function() {
 		el.remove();
 	};
 
-	this.appendTask = function(task, complete) {
-		var el = document.createElement('li');
-		el.className = "items";
-		var html = task.text;
-		
-		
-		if (!complete) {
-			html += "<span class='meta-data'> created at " + task.created + " </span>";
-			var complete_btn = "<button class='complete' onclick=\"todo_app.completeTask(this.parentElement, '" + task.text + "')\"  >Complete</button>";
-			html += complete_btn;
-		} else {
-			html += "<span class='meta-data'> completed at " + task.completed + " </span>";
-		}
-
-		html += "<button class='delete' onclick=\"todo_app.deleteTask(this.parentElement, '" + task.text + "')\" >Delete</button>";
-		el.innerHTML = html;
-		if (complete) {
-			el.dataset.completed = 'true'
-			completed_items.appendChild(el);
-			
-		} else {
-			todo_items.appendChild(el);
-			
-		}
+	this.storeTasks = function() {
+		localStorage.setItem('finished_tasks', JSON.stringify(this.finished_tasks));
+		localStorage.setItem('unfinished_tasks', JSON.stringify(this.unfinished_tasks));
 	};
+
+	
 };
 
 var todo_app = new TodoApp();
+
+var test_task = new TodoItem('test task');
 
 var add_item, new_task_field, todo_items, completed_items, stored_unfinished_tasks, stored_finished_tasks;
 
@@ -125,11 +174,13 @@ window.onload = function() {
 
 
 	_.each(stored_unfinished_tasks, function(task) {
-		todo_app.appendTask(task);
+		var el = todo_app.makeTaskElement(task, false)
+		todo_app.appendTask(el, false);
 	});
 
 	_.each(stored_finished_tasks, function(task) {
-		todo_app.appendTask(task, true);
+		var el = todo_app.makeTaskElement(task, true);
+		todo_app.appendTask(el, true);
 	});
 
 	add_item.addEventListener('click', function(e) {

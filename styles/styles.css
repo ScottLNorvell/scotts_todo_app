@@ -17,6 +17,8 @@ p {
 }
 li {
   margin: 5px;
+  /*height: 30px;*/
+
 }
 
 #container {
@@ -56,9 +58,6 @@ li {
   color: #aaaaaa;
 }
 
-li {
-  height: 40px;
-}
 
 .actions {
   float: right;
@@ -68,7 +67,8 @@ button {
   margin: 0px;
   border: none;
   cursor: pointer;
-  height: 85%;
+  /*height: 85%;*/
+  opacity: .9;
   -webkit-transition: all .5s;
   -moz-transition: all .5s;
   -ms-transition: all .5s;
@@ -77,14 +77,18 @@ button {
 }
 
 button:hover {
-  padding: 5px;
+  /*padding: 5px;*/
+  opacity: 1;
+  /*height: 100%;*/
   color: #6060ff;
 }
 
 .delete {
+  float: right;
   background: #eecccc;
 }
 .complete {
+  float: right;
   background: #eeeeee;
 }
 #add-item {
@@ -97,3 +101,9 @@ button:hover {
 #add-item:hover {
   opacity: 1;
 }
+
+
+/*orange = 255,165,0
+red = 255,0,0
+green = 0,255,0
+yellow = 255,255,0*/
