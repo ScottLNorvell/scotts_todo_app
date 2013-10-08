@@ -1,0 +1,3 @@
+# My sweet todo app for GA WDI class
+
+A work in progress... I hope you like it...
