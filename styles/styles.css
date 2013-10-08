@@ -1,3 +1,5 @@
+@import url(http://fonts.googleapis.com/css?family=Libre+Baskerville);
+
 body {
   font-family: Helvetica, Arial, Sans-Serif;
   background: #fafafa;
@@ -10,10 +12,12 @@ button, input[type=text] {
 
 h1 {
   color: #404040;
-  font-family: Georgia;
+  font-family: 'Libre Baskerville', serif;
 }
 p {
   margin: 0px;
+  font-family: 'Libre Baskerville', serif;
+  letter-spacing: 3px;
 }
 li {
   margin: 5px;
@@ -29,14 +33,22 @@ li {
 #new-task-field {
   padding: 10px;
   border: none;
+  border-bottom: 5px dashed #333;
+  border-top: 5px dashed #333;
   width: 789px;
   margin: 0 0 0 45px;
+  border-top-left-radius: 5%;
+  border-bottom-right-radius: 5%;
+  border-top-right-radius: 10%;
+  border-bottom-left-radius: 10%;
 }
 
 .items {
   padding: 10px;
   background: white;
   color: #808080;
+  border-bottom: 5px solid #404040;
+  border-top: 5px solid #404040;
 }
 .meta-data {
   color: #aaaaaa;
@@ -49,6 +61,12 @@ li {
   margin: 10px 0 10px 0;
   padding: 10px 40px 10px 10px;
   background: #404040;
+  border-bottom: 5px solid #333;
+  border-top: 5px solid #333;
+  border-top-left-radius: 10%;
+  border-bottom-right-radius: 10%;
+  border-top-right-radius: 5%;
+  border-bottom-left-radius: 5%;
   color: #eeeeee;
 }
 #finished li {
@@ -68,6 +86,8 @@ button {
   border: none;
   cursor: pointer;
   /*height: 85%;*/
+  font-family: 'Libre Baskerville', serif;
+  letter-spacing: 1px;
   opacity: .9;
   -webkit-transition: all .5s;
   -moz-transition: all .5s;
@@ -84,16 +104,23 @@ button:hover {
 }
 
 .delete {
-  float: right;
   background: #eecccc;
 }
 .complete {
-  float: right;
   background: #eeeeee;
 }
+
+.due-timer {
+  font-size: small;
+  padding: 10px;
+  color: white;
+  opacity: .5;
+}
+
 #add-item {
   background: #6060ff;
   color: black;
+  letter-spacing: 0px;
   padding: 10px 20px 10px 20px;
   opacity: .8;
 }

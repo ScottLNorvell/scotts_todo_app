@@ -6,17 +6,30 @@ function sanitize(str) {
 	return new_array.join("");
 }
 
+function getDueDate(date, due_mins) {
+	date.setMinutes(date.getMinutes() + due_mins);
+	return date
+}
 
-var TodoItem = function(text) {
+
+var TodoItem = function(text, due_mins) {
 	var date = new Date();
+	var due_date = new Date();
+	var mins = due_mins || 5
+	
+	due_date.setMinutes(due_date.getMinutes() + mins)
+
+	
 	this.text = text;
-	this.created = date.toLocaleTimeString();
+	this.created = date
 	this.completed = '';
+	this.due_date = due_date;
 };
 
 var TodoApp = function() {
 	this.finished_tasks = [];
 	this.unfinished_tasks = [];
+	this.warn_times = [295,290,285]
 
 	this.createTask = function(text) {
 		text = sanitize(text);
@@ -38,8 +51,11 @@ var TodoApp = function() {
 		var el = document.createElement('li');
 		var text_span = this.makeTextSpan(task);
 		var meta_data = this.makeMetaData(task, complete);
+		var due_timer;
 		var delete_btn = this.makeButton('delete');
-		var complete_btn = this.makeButton('complete');
+		var complete_btn;
+		var action_span = document.createElement('span');
+		action_span.className = "actions"
 		el.className = "items";
 		el.dataset.tasktext = task.text;
 
@@ -48,27 +64,18 @@ var TodoApp = function() {
 		
 		
 		if (!complete) {
-			el.appendChild(complete_btn)
+			due_timer = this.makeDueTimer(task);
+			complete_btn = this.makeButton('complete');
+			action_span.appendChild(due_timer);
+			action_span.appendChild(complete_btn);
+
 		} else {
 			el.dataset.completed = 'true';
 		}
 
-		el.appendChild(delete_btn);
+		action_span.appendChild(delete_btn);
+		el.appendChild(action_span);
 		return el 
-	};
-
-	this.makeButton = function(class_name) {
-		var button = document.createElement('button');
-		button.className = class_name;
-		if (class_name == 'delete') {
-			button.innerText = 'Delete';
-			button.onclick = function() { todo_app.deleteTask(this.parentElement); }
-		} else {
-			button.innerText = 'Complete';
-			button.onclick = function() { todo_app.completeTask(this.parentElement); }	
-		}
-
-		return button
 	};
 
 	this.makeTextSpan = function(task) {
@@ -81,12 +88,59 @@ var TodoApp = function() {
 	this.makeMetaData = function(task, complete) {
 		var meta_data = document.createElement('span');
 		meta_data.className = "meta-data";
-		if (complete) {
-			meta_data.innerText = " completed at " + task.completed + " ";
+		if (complete) { 
+			meta_data.innerText = " completed at " + task.completed.toLocaleTimeString() + " ";
 		} else {
-			meta_data.innerText = " created at " + task.created + " ";
+			meta_data.innerText = " created at " + task.created.toLocaleTimeString() + " ";
 		}
 		return meta_data;
+	};
+
+	this.makeDueTimer = function(task) {
+		var due_timer = document.createElement('span');
+		due_timer.className = 'due-timer';
+		due_timer.innerText = "due " + task.due_date.toLocaleTimeString();
+		return due_timer
+
+	};
+
+	this.updateTimer = function(el) {
+		var timer = el.getElementsByClassName('due-timer')[0];
+		var task = _.findWhere(this.unfinished_tasks, {text: el.dataset.tasktext});
+		var now = new Date();
+		var due = Math.round((task.due_date - now) / 1000);
+		if (due > this.warn_times[0]) {
+			el.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+			el.style.border = '2px solid rgba(0, 255, 0, 0.3)';
+
+		} else if (due > this.warn_times[1]) {
+			el.style.backgroundColor = 'rgba(255, 255, 0, 0.2)';
+			el.style.border = '2px solid rgba(255, 255, 0, 0.3)';
+
+		} else if (due > this.warn_times[2]) {
+			el.style.backgroundColor = 'rgba(255, 165, 0, 0.2)';
+			el.style.border = '2px dotted rgba(255, 165, 0, 0.3)';
+		} else {
+			el.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+			el.style.border = '2px dashed rgba(255, 0, 0, 0.3)';
+
+		}
+
+		timer.innerText = "due in " + due + " seconds";
+	}
+
+	this.makeButton = function(class_name) {
+		var button = document.createElement('button');
+		button.className = class_name;
+		if (class_name == 'delete') {
+			button.innerText = 'Delete';
+			button.onclick = function() { todo_app.deleteTask(this.parentElement.parentElement); }
+		} else {
+			button.innerText = 'Complete';
+			button.onclick = function() { todo_app.completeTask(this.parentElement.parentElement); }	
+		}
+
+		return button
 	};
 
 
@@ -95,11 +149,14 @@ var TodoApp = function() {
 		if (complete) {
 			completed_items.appendChild(el);
 		} else {
+			this.updateTimer(el);
 			todo_items.appendChild(el);
+			el.timer = setInterval(function() { todo_app.updateTimer(el); }, 1000);
 		}
 	};
 
 	this.completeTask = function(el) {
+		clearInterval(el.timer);
 		var completed = new Date();
 		var text = el.dataset.tasktext;
 		var task, completed_el;
@@ -109,7 +166,7 @@ var TodoApp = function() {
 		task = _.findWhere(this.unfinished_tasks, {text: text});
 		
 		if (task) {
-			task.completed = completed.toLocaleTimeString();
+			task.completed = completed;
 		}
 
 		completed_el = this.makeTaskElement(task, true);
@@ -124,6 +181,7 @@ var TodoApp = function() {
 	};
 
 	this.deleteTask = function(el) {
+		clearInterval(el.timer);
 		var updated_array, task;
 		var completed = el.dataset.completed;
 		var text = el.dataset.tasktext;
@@ -157,8 +215,10 @@ var TodoApp = function() {
 var todo_app = new TodoApp();
 
 var test_task = new TodoItem('test task');
-
+var first_item;
 var add_item, new_task_field, todo_items, completed_items, stored_unfinished_tasks, stored_finished_tasks;
+
+
 
 window.onload = function() {
 	add_item = document.getElementById('add-item');
@@ -174,11 +234,17 @@ window.onload = function() {
 
 
 	_.each(stored_unfinished_tasks, function(task) {
+		task.created = new Date(task.created);
+		task.due_date = new Date(task.due_date);
+		
 		var el = todo_app.makeTaskElement(task, false)
 		todo_app.appendTask(el, false);
 	});
 
 	_.each(stored_finished_tasks, function(task) {
+		task.created = new Date(task.created);
+		task.due_date = new Date(task.due_date);
+		task.completed = new Date(task.completed);
 		var el = todo_app.makeTaskElement(task, true);
 		todo_app.appendTask(el, true);
 	});
@@ -196,6 +262,8 @@ window.onload = function() {
 			todo_app.createTask(text);
 		}
 	});
+
+	first_item = document.getElementsByClassName('items')[0]
 }
 
 
